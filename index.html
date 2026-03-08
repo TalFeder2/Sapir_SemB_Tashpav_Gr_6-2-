@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>מערכת שעות | סמסטר ב' תשפ"ו | מחזור 6</title>
+  <meta name="description" content="מערכת שעות לשיעורים פיזיים או מקוונים." />
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body{margin:0;font-family:'Heebo',sans-serif;background:#2b3a59;color:#f1f5f9;text-align:center;direction:rtl}
+    header{padding:20px}
+    .logo{max-width:200px;margin:20px auto 10px;display:block}
+    .subheader{font-size:16px;color:#94a3b8;margin-bottom:20px;font-weight:500}
+    h1{margin:10px 0;font-size:26px;font-weight:800}
+    .next{max-width:860px;margin:0 auto 8px; padding:14px 18px; border-radius:14px; 
+      background:#3a4a6a; box-shadow:0 8px 18px rgba(0,0,0,.18); text-align:center}
+    .next-title{font-size:20px; font-weight:800; margin:0 0 6px}
+    .next-date{color:#fde68a; font-weight:800}
+    .next-type{margin:0; color:#e2e8f0; font-weight:600}
+    
+    /* כפתורי השליטה בשבועות */
+    .controls { display: flex; justify-content: center; gap: 12px; margin: 15px auto 25px; flex-wrap: wrap; }
+    .control-btn { background: #1e293b; color: #f8fafc; border: 2px solid #38bdf8; padding: 10px 20px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s ease; font-family: 'Heebo', sans-serif; }
+    .control-btn:hover { background: #38bdf8; color: #0f172a; transform: translateY(-2px); }
+    .control-btn:active { transform: translateY(0); }
+    .control-btn.current { background: #38bdf8; color: #0f172a; font-weight: 800; }
+
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;max-width:800px;margin:0 auto;padding:0 20px 20px}
+    @media(max-width:700px){.grid{grid-template-columns:1fr}}
+    .card{background:#3a4a6a;border-radius:18px;padding:18px;box-shadow:0 8px 18px rgba(0,0,0,.25)}
+    .lecturer{font-weight:700;font-size:18px;margin-bottom:4px}
+    .course{color:#dbeafe;font-weight:600;margin:0 0 8px}
+    .time{font-weight:600;color:#38bdf8;margin-bottom:6px}
+    .break{color:#cbd5e1;font-size:14px;margin:2px 0}
+    .room-info{color:#fde68a;font-weight:600;font-size:15px;margin:4px 0}
+    .btn{display:inline-block;width:90%;padding:10px 12px;border-radius:10px;text-decoration:none;color:#00131a;font-weight:800;background:linear-gradient(90deg,#38bdf8,#22d3ee);transition:transform .1s ease;margin-top:8px}
+    .btn:hover{transform:translateY(-2px)}
+    
+    /* עיצוב להנחיות הלמידה המקוונת */
+    .online-guidelines { grid-column: 1 / -1; background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; padding: 15px 20px; border-radius: 14px; text-align: right; margin-top: 10px; font-size: 14px; color: #e2e8f0; line-height: 1.6; }
+    .online-guidelines strong { color: #38bdf8; display: block; margin-bottom: 5px; font-size: 16px; }
+
+    footer{color:#94a3b8;font-size:13px;margin:30px 0 80px}
+    .floating-btn{position:fixed;left:20px;bottom:20px;background:linear-gradient(180deg,#facc15,#f59e0b);color:#1e293b;font-weight:800;border:none;border-radius:12px;padding:14px 18px;width:160px;cursor:pointer;text-decoration:none;box-shadow:0 6px 14px rgba(0,0,0,.35);transition:transform .2s ease,filter .2s ease;display:flex;align-items:center;justify-content:center;text-align:center;}
+    .floating-btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+  </style>
+</head>
+<body>
+  <header>
+    <img src="Sapir_new_logo.svg.png" alt="לוגו ספיר" class="logo" />
+    <div class="subheader">תואר שני במנהיגות ויזמות בתרבות</div>
+    <h1>מערכת שעות – יום רביעי | סמסטר ב' תשפ"ו | מחזור 6</h1>
+  </header>
+
+  <section class="next">
+    <p class="next-title">המפגש המוצג: יום רביעי <span id="next-date" class="next-date"></span></p>
+    <p id="meeting-type" class="next-type">—</p>
+  </section>
+
+  <div class="controls">
+    <button id="btn-prev" class="control-btn">השבוע הקודם</button>
+    <button id="btn-current" class="control-btn current">שבוע נוכחי</button>
+    <button id="btn-next" class="control-btn">השבוע הבא</button>
+  </div>
+
+  <section id="schedule" class="grid"></section>
+
+  <a class="floating-btn" href="https://docs.google.com/document/d/19qfChZdUFZ5rJ8jfGhk3b38rAtpyJUu1/edit?usp=sharing&ouid=109655004313851384278&rtpof=true&sd=true" target="_blank">📄 קישור לקובץ לוח זמנים מלא</a>
+
+  <footer>© 2026 מערכת שעות | תאריך עדכון: 8/3/26</footer>
+
+  <script>
+    const heMonths = ["ינואר","פברואר","מרץ","אפריל","מאי","יוני","יולי","אוגוסט","ספטמבר","אוקטובר","נובמבר","דצמבר"];
+
+    const schedule = [
+      { day: 4,  month: "מרץ", type: "לימודים מקוונים", skipSadna: true },
+      { day: 11, month: "מרץ", type: "לימודים מקוונים", skipSadna: true },
+      { day: 18, month: "מרץ", type: "לימודים מקוונים" },
+      { day: 25, month: "מרץ", type: "לימודים מקוונים" },
+      { day: 1,  month: "אפריל", type: "חופשה", special: "חופשת פסח - אין לימודים" },
+      { day: 8,  month: "אפריל", type: "חופשה", special: "חופשת פסח - אין לימודים" },
+      { day: 15, month: "אפריל", type: "לימודים מקוונים" },
+      { day: 22, month: "אפריל", type: "חופשה", special: "יום העצמאות - אין לימודים" },
+      { day: 29, month: "אפריל", type: "יום לימודים פיזי", skipSadna: true },
+      { day: 6,  month: "מאי", type: "לימודים מקוונים" },
+      { day: 13, month: "מאי", type: "לימודים מקוונים", skipSadna: true },
+      { day: 20, month: "מאי", type: "לימודים מקוונים" },
+      { day: 27, month: "מאי", type: "יום לימודים פיזי", skipSadna: true },
+      { day: 3,  month: "יוני", type: "לימודים מקוונים" },
+      { day: 10, month: "יוני", type: "לימודים מקוונים", skipSadna: true },
+      { day: 17, month: "יוני", type: "יום לימודים פיזי", special: "סיור" },
+      { day: 24, month: "יוני", type: "יום שמור", special: "יום שמור לשיעורי השלמה במידה ויהיה צורך" },
+    ];
+
+    const courses = [
+      { id: "sadna", lecturer:"גב' יעלה חזות", course:"תעשיות יצירתיות ואימפקט - סדנה", time:"9:00–10:30", break:"10:30–11:00", zoom:"https://sapir.zoom.us/j/5690169782?pwd=VEdzUlpuUUhNL2w2Q1c0SlFDNGpiUT09" },
+      { id: "tarbut", lecturer:"ד\"ר יעל שנקר", course:"קונפליקטים של תרבויות", time:"11:00–14:15", break:"14:15–15:00", physicalBreak:"14:15–15:00 (משותף עם מחזור 7)", zoom:"https://sapir.zoom.us/j/5569375877", room:"בניין 14, חדר 14103" },
+      { id: "maabada", lecturer:"גב' מיכל דיין", course:"המעבדה", time:"15:00–19:00", physicalTime:"15:00–19:30", zoom:"https://sapir.zoom.us/my/michaldayan", room:"בניין 14, חדר 14103" }
+    ];
+
+    function getNextWednesday(fromDate){
+      const d = new Date(fromDate.getFullYear(), fromDate.getMonth(), fromDate.getDate());
+      const WED = 3;
+      let diff = (WED - d.getDay() + 7) % 7;
+      d.setDate(d.getDate() + diff);
+      return d;
+    }
+
+    let currentDateToView = new Date();
+
+    function renderSchedule(dateToView) {
+      const nextWed = getNextWednesday(dateToView);
+      const day = nextWed.getDate();
+      const monthName = heMonths[nextWed.getMonth()];
+
+      document.getElementById('next-date').textContent = `${day} ב${monthName}`;
+
+      const match = schedule.find(e => e.day === day && e.month === monthName);
+      
+      const typeDisplay = match ? match.type : "אין מידע זמין בלוח הזמנים";
+      document.getElementById('meeting-type').textContent = typeDisplay;
+
+      const container = document.getElementById("schedule");
+      container.innerHTML = ""; 
+
+      if (match) {
+        if (match.type === "חופשה" || match.type === "יום שמור" || match.special === "סיור" || match.special?.includes("ביקור")) {
+          const card = document.createElement("article");
+          card.className = "card";
+          card.style.gridColumn = "1 / -1"; 
+          card.style.textAlign = "center";
+          card.innerHTML = `<h2 style="color: #fde68a; margin: 10px 0;">${match.special}</h2>`;
+          container.appendChild(card);
+        } else {
+          const isPhysical = match.type.includes("פיזי");
+          const isOnline = match.type.includes("מקוונים");
+
+          courses.forEach(cls => {
+            if (cls.id === "sadna" && match.skipSadna) return;
+            
+            // תמיכה דינמית בזמני שיעור והפסקות לפי סוג היום
+            const displayTime = (isPhysical && cls.physicalTime) ? cls.physicalTime : cls.time;
+            const displayBreak = (isPhysical && cls.physicalBreak) ? cls.physicalBreak : cls.break;
+            
+            const card = document.createElement("article");
+            card.className = "card";
+            card.innerHTML = `
+              <div class="lecturer">${cls.lecturer}</div>
+              <div class="course">${cls.course}</div>
+              <div class="time">${displayTime}</div>
+              ${isPhysical && cls.room ? `<div class="room-info">מיקום: ${cls.room}</div>` : ""}
+              ${displayBreak ? `<div class="break">הפסקה: ${displayBreak}</div>` : ""}
+              ${!isPhysical && cls.zoom ? `<a class="btn" href="${cls.zoom}" target="_blank">⤴︎ כניסה לזום</a>` : ""}
+            `;
+            container.appendChild(card);
+          });
+
+          // הוספת הנחיות למידה מקוונת רק בימי זום
+          if (isOnline) {
+            const notesDiv = document.createElement("div");
+            notesDiv.className = "online-guidelines";
+            notesDiv.innerHTML = `
+              <strong>📌 הנחיות ללמידה מקוונת:</strong>
+              אנא הקפידו להיכנס בזמן לשיעורים המקוונים.<br>
+              הכינו לעצמכם עמדת לימוד נעימה ושקטה ממנה תוכלו להקשיב ולהשתתף בשיעורים.<br>
+              אנא השאירו מצלמה פתוחה, ובבקשה לא לעסוק בפעולות אחרות במקביל להשתתפות בשיעור.
+            `;
+            container.appendChild(notesDiv);
+          }
+        }
+      } else {
+        container.innerHTML = `<p style="grid-column: 1 / -1; font-size: 18px; color: #cbd5e1; text-align: center;">אין שיעורים מתוכננים לשבוע זה.</p>`;
+      }
+    }
+
+    renderSchedule(currentDateToView);
+
+    document.getElementById('btn-prev').addEventListener('click', () => {
+      currentDateToView.setDate(currentDateToView.getDate() - 7);
+      renderSchedule(currentDateToView);
+    });
+
+    document.getElementById('btn-next').addEventListener('click', () => {
+      currentDateToView.setDate(currentDateToView.getDate() + 7);
+      renderSchedule(currentDateToView);
+    });
+
+    document.getElementById('btn-current').addEventListener('click', () => {
+      currentDateToView = new Date();
+      renderSchedule(currentDateToView);
+    });
+
+  </script>
+</body>
+</html>
