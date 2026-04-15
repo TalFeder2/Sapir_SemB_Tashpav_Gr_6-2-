@@ -18,7 +18,6 @@
     .next-date{color:#fde68a; font-weight:800}
     .next-type{margin:0; color:#e2e8f0; font-weight:600}
     
-    /* כפתורי השליטה בשבועות */
     .controls { display: flex; justify-content: center; gap: 12px; margin: 15px auto 25px; flex-wrap: wrap; }
     .control-btn { background: #1e293b; color: #f8fafc; border: 2px solid #38bdf8; padding: 10px 20px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.2s ease; font-family: 'Heebo', sans-serif; }
     .control-btn:hover { background: #38bdf8; color: #0f172a; transform: translateY(-2px); }
@@ -36,13 +35,34 @@
     .btn{display:inline-block;width:90%;padding:10px 12px;border-radius:10px;text-decoration:none;color:#00131a;font-weight:800;background:linear-gradient(90deg,#38bdf8,#22d3ee);transition:transform .1s ease;margin-top:8px}
     .btn:hover{transform:translateY(-2px)}
     
-    /* עיצוב להנחיות הלמידה המקוונת */
     .online-guidelines { grid-column: 1 / -1; background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8; padding: 15px 20px; border-radius: 14px; text-align: right; margin-top: 10px; font-size: 14px; color: #e2e8f0; line-height: 1.6; }
     .online-guidelines strong { color: #38bdf8; display: block; margin-bottom: 5px; font-size: 16px; }
 
     footer{color:#94a3b8;font-size:13px;margin:30px 0 80px}
     .floating-btn{position:fixed;left:20px;bottom:20px;background:linear-gradient(180deg,#facc15,#f59e0b);color:#1e293b;font-weight:800;border:none;border-radius:12px;padding:14px 18px;width:160px;cursor:pointer;text-decoration:none;box-shadow:0 6px 14px rgba(0,0,0,.35);transition:transform .2s ease,filter .2s ease;display:flex;align-items:center;justify-content:center;text-align:center;}
     .floating-btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+
+    /* Party Styling for the festive break */
+    .party-card {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%), 
+                  linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%) !important;
+      background-blend-mode: screen;
+      color: #1e293b !important;
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4) !important;
+    }
+    .party-card .course {
+      color: #0f172a !important;
+      font-weight: 800 !important;
+      font-size: 1.1rem;
+    }
+    .party-card .time {
+      color: #6d28d9 !important; /* Deeper purple */
+      font-weight: 800 !important;
+    }
+    .party-card .room-info {
+      color: #b91c1c !important; /* Strong red for contrast */
+      font-weight: 700 !important;
+    }
   </style>
 </head>
 <body>
@@ -81,7 +101,7 @@
       { day: 8,  month: "אפריל", type: "חופשה", special: "חופשת פסח - אין לימודים" },
       { day: 15, month: "אפריל", type: "לימודים מקוונים" },
       { day: 22, month: "אפריל", type: "חופשה", special: "יום העצמאות - אין לימודים" },
-      { day: 29, month: "אפריל", type: "יום לימודים פיזי", skipSadna: true },
+      { day: 29, month: "אפריל", type: "יום לימודים פיזי מיוחד ", special: "custom29", skipSadna: true },
       { day: 6,  month: "מאי", type: "לימודים מקוונים" },
       { day: 13, month: "מאי", type: "לימודים מקוונים", skipSadna: true },
       { day: 20, month: "מאי", type: "לימודים מקוונים" },
@@ -132,13 +152,51 @@
           card.innerHTML = `<h2 style="color: #fde68a; margin: 10px 0;">${match.special}</h2>`;
           container.appendChild(card);
         } else {
+
+          if (match.special === "custom29") {
+            const customCards = [
+              {
+                lecturer: "גב' מיכל דיין ופרופ' עמרי הרצוג",
+                course: "המעבדה",
+                time: "10:00–12:45",
+                room: "בניין 14, חדר 14103"
+              },
+              {
+                lecturer: "",
+                course: "✨ הפסקה חגיגית משותפת עם מחזור 7 🎉",
+                time: "12:45–13:45",
+                isParty: true // Flag for special styling
+              },
+              {
+                lecturer: "ד\"ר יעל שנקר",
+                course: "קונפליקטים של תרבויות",
+                time: "13:45–16:45",
+                room: "בניין 14, חדר 14103"
+              }
+            ];
+
+            customCards.forEach(cls => {
+              const card = document.createElement("article");
+              // Add party-card class if isParty flag is true
+              card.className = `card ${cls.isParty ? 'party-card' : ''}`;
+              card.innerHTML = `
+                ${cls.lecturer ? `<div class="lecturer">${cls.lecturer}</div>` : ""}
+                <div class="course">${cls.course}</div>
+                <div class="time">${cls.time}</div>
+                ${cls.room ? `<div class="room-info">מיקום: ${cls.room}</div>` : ""}
+              `;
+              container.appendChild(card);
+            });
+
+            return;
+          }
+
           const isPhysical = match.type.includes("פיזי");
           const isOnline = match.type.includes("מקוונים");
 
           courses.forEach(cls => {
             if (cls.id === "sadna" && match.skipSadna) return;
             
-            // תמיכה דינמית בזמני שיעור והפסקות לפי סוג היום
             const displayTime = (isPhysical && cls.physicalTime) ? cls.physicalTime : cls.time;
             const displayBreak = (isPhysical && cls.physicalBreak) ? cls.physicalBreak : cls.break;
             
@@ -155,7 +213,6 @@
             container.appendChild(card);
           });
 
-          // הוספת הנחיות למידה מקוונת רק בימי זום
           if (isOnline) {
             const notesDiv = document.createElement("div");
             notesDiv.className = "online-guidelines";
@@ -189,7 +246,6 @@
       currentDateToView = new Date();
       renderSchedule(currentDateToView);
     });
-
   </script>
 </body>
 </html>
