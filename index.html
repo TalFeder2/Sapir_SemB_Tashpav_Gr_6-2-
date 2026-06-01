@@ -106,7 +106,7 @@
       { day: 13, month: "מאי", type: "לימודים מקוונים", skipSadna: true },
       { day: 20, month: "מאי", type: "לימודים מקוונים" },
       { day: 27, month: "מאי", type: "יום לימודים פיזי", skipSadna: true },
-      { day: 3,  month: "יוני", type: "לימודים מקוונים", skipSadna: true },
+      { day: 3,  month: "יוני", type: "לימודים מקוונים", special: "custom3jun" },
       { day: 10, month: "יוני", type: "לימודים מקוונים" },
       { day: 17, month: "יוני", type: "יום לימודים פיזי", special: "סיור" },
       { day: 24, month: "יוני", type: "יום שמור", special: "יום שמור לשיעורי השלמה במידה ויהיה צורך" },
@@ -152,6 +152,42 @@
           card.innerHTML = `<h2 style="color: #fde68a; margin: 10px 0;">${match.special}</h2>`;
           container.appendChild(card);
         } else {
+
+          if (match.special === "custom3jun") {
+            const customCards = [
+              {
+                course: "הצגת קול קורא למענקי פיתוח לפרויקטים במעבדה",
+                time: "10:30",
+                zoom: "https://oranim-ac-il.zoom.us/j/85175285708?pwd=IHWbPtY1CXu9xOhYDPSSjqSQMDEHtZ.1"
+              },
+              {
+                lecturer: "ד\"ר יעל שנקר",
+                course: "קונפליקטים של תרבויות",
+                time: "11:00–14:15",
+                break: "14:15–15:00",
+                zoom: "https://sapir.zoom.us/j/5569375877"
+              },
+              {
+                lecturer: "גב' מיכל דיין",
+                course: "המעבדה",
+                time: "15:00–19:00",
+                zoom: "https://sapir.zoom.us/my/michaldayan"
+              }
+            ];
+            customCards.forEach(cls => {
+              const card = document.createElement("article");
+              card.className = "card";
+              card.innerHTML = `
+                ${cls.lecturer ? `<div class="lecturer">${cls.lecturer}</div>` : ""}
+                <div class="course">${cls.course}</div>
+                <div class="time">${cls.time}</div>
+                ${cls.break ? `<div class="break">הפסקה: ${cls.break}</div>` : ""}
+                ${cls.zoom ? `<a class="btn" href="${cls.zoom}" target="_blank">⤴︎ כניסה לזום</a>` : ""}
+              `;
+              container.appendChild(card);
+            });
+            return;
+          }
 
           if (match.special === "custom29") {
             const customCards = [
